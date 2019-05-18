@@ -6,39 +6,39 @@ export enum Turn { Player, Ai }
 
 class Game extends React.Component<{}, {}> {
 
-  public board: Board;
-  public mounted: boolean = false;
-  public aiThinking: boolean = false;
+  public board: Board
+  public mounted: boolean = false
+  public aiThinking: boolean = false
 
   constructor(props) {
-    super(props);
+    super(props)
 
-    this.board = new Board({game: this});
-    this.board.initalize();
+    this.board = new Board({game: this})
+    this.board.initalize()
   }
 
   public render() {
-    return <>{this.board.render()}</>;
+    return <>{this.board.render()}</>
   }
 
   public componentDidMount(): void {
-    this.mounted = true;
-    this.setState({ waitIsActive: false });
+    this.mounted = true
+    this.setState({waitIsActive: false})
   }
 
   public componentWillMount(): void {
-    this.mounted = false;
+    this.mounted = false
   }
 
   public forceUpdateIfMounted(): void {
     if (this.mounted) {
-      this.forceUpdate();
+      this.forceUpdate()
     }
   }
 
   public handlePieceClick(piece: Piece): void {
     if (this.board.turn !== Turn.Player) {
-      return;
+      return
     }
 
     if (this.board.isGameOver()) {
@@ -46,34 +46,34 @@ class Game extends React.Component<{}, {}> {
     }
 
     if (!this.board.isLegalMove(piece.row, piece.col)) {
-      return;
+      return
     }
 
-    this.board.grid[piece.row][piece.col].letter = this.board.turnLetter();
-    this.forceUpdateIfMounted();
+    this.board.grid[piece.row][piece.col].letter = this.board.turnLetter()
+    this.forceUpdateIfMounted()
 
     if (this.board.movesCount() == 0) {
-      return;
+      return
     }
 
     if (this.board.isGameOver()) {
       return
     }
 
-    this.board.changeTurn();
-    this.aiThinking = true;
-    this.forceUpdateIfMounted();
-    this.waitAiTurn();
+    this.board.changeTurn()
+    this.aiThinking = true
+    this.forceUpdateIfMounted()
+    this.waitAiTurn()
   }
 
   private waitAiTurn() {
-    const that = this;
-    setTimeout( () => {
-      that.aiTurn();
-      this.board.changeTurn();
-      this.aiThinking = false;
-      this.forceUpdateIfMounted();
-    }, 200);
+    const that = this
+    setTimeout(() => {
+      that.aiTurn()
+      this.board.changeTurn()
+      this.aiThinking = false
+      this.forceUpdateIfMounted()
+    }, 200)
   }
 
   private aiTurn(): void {
@@ -85,106 +85,106 @@ class Game extends React.Component<{}, {}> {
     // rows
     for (let row = 0; row < Board.SIZE; row++) {
 
-      if(grid[row][0].letter == playerLetter
+      if (grid[row][0].letter == playerLetter
         && grid[row][1].letter == playerLetter
         && grid[row][2].letter == Letter.Empty) {
-        grid[row][2].letter = aiLetter;
-        return;
+        grid[row][2].letter = aiLetter
+        return
       }
 
-      if(grid[row][0].letter == playerLetter
+      if (grid[row][0].letter == playerLetter
         && grid[row][2].letter == playerLetter
         && grid[row][1].letter == Letter.Empty) {
-        grid[row][1].letter = aiLetter;
-        return;
+        grid[row][1].letter = aiLetter
+        return
       }
 
-      if(grid[row][1].letter == playerLetter
+      if (grid[row][1].letter == playerLetter
         && grid[row][2].letter == playerLetter
         && grid[row][0].letter == Letter.Empty) {
-        grid[row][0].letter = aiLetter;
-        return;
+        grid[row][0].letter = aiLetter
+        return
       }
     }
 
     // cols
     for (let col = 0; col < Board.SIZE; col++) {
 
-      if(grid[0][col].letter == playerLetter
+      if (grid[0][col].letter == playerLetter
         && grid[1][col].letter == playerLetter
         && grid[2][col].letter == Letter.Empty) {
-        grid[2][col].letter = aiLetter;
-        return;
+        grid[2][col].letter = aiLetter
+        return
       }
 
-      if(grid[0][col].letter == playerLetter
+      if (grid[0][col].letter == playerLetter
         && grid[2][col].letter == playerLetter
         && grid[1][col].letter == Letter.Empty) {
-        grid[1][col].letter = aiLetter;
-        return;
+        grid[1][col].letter = aiLetter
+        return
       }
 
-      if(grid[1][col].letter == playerLetter
+      if (grid[1][col].letter == playerLetter
         && grid[2][col].letter == playerLetter
         && grid[0][col].letter == Letter.Empty) {
-        grid[0][col].letter = aiLetter;
-        return;
+        grid[0][col].letter = aiLetter
+        return
       }
     }
 
     // diagonals
 
     // top left - bottom right
-    if(grid[0][0].letter == playerLetter
+    if (grid[0][0].letter == playerLetter
       && grid[1][1].letter == playerLetter
       && grid[2][2].letter == Letter.Empty) {
-      grid[2][2].letter = aiLetter;
-      return;
+      grid[2][2].letter = aiLetter
+      return
     }
 
-    if(grid[0][0].letter == playerLetter
+    if (grid[0][0].letter == playerLetter
       && grid[2][2].letter == playerLetter
       && grid[1][1].letter == Letter.Empty) {
-      grid[1][1].letter = aiLetter;
-      return;
+      grid[1][1].letter = aiLetter
+      return
     }
 
-    if(grid[2][2].letter == playerLetter
+    if (grid[2][2].letter == playerLetter
       && grid[1][1].letter == playerLetter
       && grid[0][0].letter == Letter.Empty) {
-      grid[0][0].letter = aiLetter;
-      return;
+      grid[0][0].letter = aiLetter
+      return
     }
 
     // bottom left - top right
-    if(grid[2][0].letter == playerLetter
+    if (grid[2][0].letter == playerLetter
       && grid[1][1].letter == playerLetter
       && grid[0][2].letter == Letter.Empty) {
-      grid[0][2].letter = aiLetter;
-      return;
+      grid[0][2].letter = aiLetter
+      return
     }
 
-    if(grid[2][0].letter == playerLetter
+    if (grid[2][0].letter == playerLetter
       && grid[0][2].letter == playerLetter
       && grid[1][1].letter == Letter.Empty) {
-      grid[1][1].letter = aiLetter;
-      return;
+      grid[1][1].letter = aiLetter
+      return
     }
 
-    if(grid[0][2].letter == playerLetter
+    if (grid[0][2].letter == playerLetter
       && grid[1][1].letter == playerLetter
       && grid[2][0].letter == Letter.Empty) {
-      grid[2][0].letter = aiLetter;
-      return;
+      grid[2][0].letter = aiLetter
+      return
     }
 
     // first available
     for (let row = 0; row < Board.SIZE; row++) {
       for (let col = 0; col < Board.SIZE; col++) {
         console.log("row: " + row + ", col: " + col)
-        if(this.board.isLegalMove(row, col)) {
-          grid[row][col].letter = aiLetter;
-          return;
+        if (this.board.isLegalMove(row, col)) {
+          grid[row][col].letter = aiLetter
+          return
         }
       }
     }
