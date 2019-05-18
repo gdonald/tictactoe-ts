@@ -1,6 +1,6 @@
-import React from "react";
-import Board from "./Board";
-import Piece from "./Piece";
+import React from "react"
+import Board from "./Board"
+import Piece, {Letter} from "./Piece"
 
 export enum Turn { Player, Ai }
 
@@ -78,12 +78,112 @@ class Game extends React.Component<{}, {}> {
 
   private aiTurn(): void {
 
-    // TODO
+    const playerLetter = this.board.playerLetter
+    const aiLetter = this.board.aiLetter
+    const grid = this.board.grid
 
+    // rows
+    for (let row = 0; row < Board.SIZE; row++) {
+
+      if(grid[row][0].letter == playerLetter
+        && grid[row][1].letter == playerLetter
+        && grid[row][2].letter == Letter.Empty) {
+        grid[row][2].letter = aiLetter;
+        return;
+      }
+
+      if(grid[row][0].letter == playerLetter
+        && grid[row][2].letter == playerLetter
+        && grid[row][1].letter == Letter.Empty) {
+        grid[row][1].letter = aiLetter;
+        return;
+      }
+
+      if(grid[row][1].letter == playerLetter
+        && grid[row][2].letter == playerLetter
+        && grid[row][0].letter == Letter.Empty) {
+        grid[row][0].letter = aiLetter;
+        return;
+      }
+    }
+
+    // cols
+    for (let col = 0; col < Board.SIZE; col++) {
+
+      if(grid[0][col].letter == playerLetter
+        && grid[1][col].letter == playerLetter
+        && grid[2][col].letter == Letter.Empty) {
+        grid[2][col].letter = aiLetter;
+        return;
+      }
+
+      if(grid[0][col].letter == playerLetter
+        && grid[2][col].letter == playerLetter
+        && grid[1][col].letter == Letter.Empty) {
+        grid[1][col].letter = aiLetter;
+        return;
+      }
+
+      if(grid[1][col].letter == playerLetter
+        && grid[2][col].letter == playerLetter
+        && grid[0][col].letter == Letter.Empty) {
+        grid[0][col].letter = aiLetter;
+        return;
+      }
+    }
+
+    // diagonals
+
+    // top left - bottom right
+    if(grid[0][0].letter == playerLetter
+      && grid[1][1].letter == playerLetter
+      && grid[2][2].letter == Letter.Empty) {
+      grid[2][2].letter = aiLetter;
+      return;
+    }
+
+    if(grid[0][0].letter == playerLetter
+      && grid[2][2].letter == playerLetter
+      && grid[1][1].letter == Letter.Empty) {
+      grid[1][1].letter = aiLetter;
+      return;
+    }
+
+    if(grid[2][2].letter == playerLetter
+      && grid[1][1].letter == playerLetter
+      && grid[0][0].letter == Letter.Empty) {
+      grid[0][0].letter = aiLetter;
+      return;
+    }
+
+    // bottom left - top right
+    if(grid[2][0].letter == playerLetter
+      && grid[1][1].letter == playerLetter
+      && grid[0][2].letter == Letter.Empty) {
+      grid[0][2].letter = aiLetter;
+      return;
+    }
+
+    if(grid[2][0].letter == playerLetter
+      && grid[0][2].letter == playerLetter
+      && grid[1][1].letter == Letter.Empty) {
+      grid[1][1].letter = aiLetter;
+      return;
+    }
+
+    if(grid[0][2].letter == playerLetter
+      && grid[1][1].letter == playerLetter
+      && grid[2][0].letter == Letter.Empty) {
+      grid[2][0].letter = aiLetter;
+      return;
+    }
+
+    // first available
     for (let row = 0; row < Board.SIZE; row++) {
       for (let col = 0; col < Board.SIZE; col++) {
+        console.log("row: " + row + ", col: " + col)
         if(this.board.isLegalMove(row, col)) {
-          this.board.grid[row][col].letter = this.board.turnLetter();
+          grid[row][col].letter = aiLetter;
           return;
         }
       }
