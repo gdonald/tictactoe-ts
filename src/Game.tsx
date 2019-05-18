@@ -41,6 +41,10 @@ class Game extends React.Component<{}, {}> {
       return;
     }
 
+    if (this.board.isGameOver()) {
+      return
+    }
+
     if (!this.board.isLegalMove(piece.row, piece.col)) {
       return;
     }
@@ -50,6 +54,10 @@ class Game extends React.Component<{}, {}> {
 
     if (this.board.movesCount() == 0) {
       return;
+    }
+
+    if (this.board.isGameOver()) {
+      return
     }
 
     this.board.changeTurn();

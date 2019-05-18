@@ -1,6 +1,6 @@
 import React from "react"
-import Game, {Turn} from "./Game";
-import Piece, {Letter} from "./Piece";
+import Game, {Turn} from "./Game"
+import Piece, {Letter} from "./Piece"
 
 class Board extends React.Component<{}, {}> {
 
@@ -72,7 +72,36 @@ class Board extends React.Component<{}, {}> {
       return true;
     }
 
-    // TODO
+    // rows
+    for (let row = 0; row < Board.SIZE; row++) {
+      if(this.grid[row][0].letter != Letter.Empty
+        && this.grid[row][0].letter == this.grid[row][1].letter
+        && this.grid[row][1].letter == this.grid[row][2].letter) {
+        return true
+      }
+    }
+
+    // cols
+    for (let col = 0; col < Board.SIZE; col++) {
+      if(this.grid[0][col].letter != Letter.Empty
+        && this.grid[0][col].letter == this.grid[1][col].letter
+        && this.grid[1][col].letter == this.grid[2][col].letter) {
+        return true
+      }
+    }
+
+    // diagonals
+    if(this.grid[0][0].letter != Letter.Empty
+      && this.grid[0][0].letter == this.grid[1][1].letter
+      && this.grid[1][1].letter == this.grid[2][2].letter) {
+      return true
+    }
+
+    if(this.grid[2][0].letter != Letter.Empty
+      && this.grid[2][0].letter == this.grid[1][1].letter
+      && this.grid[1][1].letter == this.grid[0][2].letter) {
+      return true
+    }
 
     return false;
   }
