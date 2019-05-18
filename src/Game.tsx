@@ -82,6 +82,12 @@ class Game extends React.Component<{}, {}> {
     const aiLetter = this.board.aiLetter
     const grid = this.board.grid
 
+    // take center
+    if (this.board.movesCount() == 8 && grid[1][1].letter == Letter.Empty) {
+      grid[1][1].letter = aiLetter
+      return
+    }
+
     // rows
     for (let row = 0; row < Board.SIZE; row++) {
 
@@ -181,7 +187,6 @@ class Game extends React.Component<{}, {}> {
     // first available
     for (let row = 0; row < Board.SIZE; row++) {
       for (let col = 0; col < Board.SIZE; col++) {
-        console.log("row: " + row + ", col: " + col)
         if (this.board.isLegalMove(row, col)) {
           grid[row][col].letter = aiLetter
           return
