@@ -88,6 +88,24 @@ class Game extends React.Component<{}, {}> {
       return
     }
 
+    // prevent triangle trap
+    if (this.board.movesCount() == 6) {
+
+      if (grid[0][0].letter == playerLetter
+        && grid[1][1].letter == aiLetter
+        && grid[2][2].letter == playerLetter) {
+        grid[0][1].letter = aiLetter
+        return
+      }
+
+      if (grid[0][2].letter == playerLetter
+        && grid[1][1].letter == aiLetter
+        && grid[2][0].letter == playerLetter) {
+        grid[0][1].letter = aiLetter
+        return
+      }
+    }
+
     // rows
     for (let row = 0; row < Board.SIZE; row++) {
 
