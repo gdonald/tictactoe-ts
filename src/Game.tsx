@@ -82,13 +82,108 @@ class Game extends React.Component<{}, {}> {
     const aiLetter = this.board.aiLetter
     const grid = this.board.grid
 
+    // take the win
+
+    // rows
+    for (let row = 0; row < Board.SIZE; row++) {
+      if (grid[row][0].letter == Letter.Empty
+        && grid[row][1].letter == aiLetter
+        && grid[row][2].letter == aiLetter) {
+        grid[row][0].letter = aiLetter
+        return
+      }
+
+      if (grid[row][1].letter == Letter.Empty
+        && grid[row][0].letter == aiLetter
+        && grid[row][2].letter == aiLetter) {
+        grid[row][1].letter = aiLetter
+        return
+      }
+
+      if (grid[row][2].letter == Letter.Empty
+        && grid[row][0].letter == aiLetter
+        && grid[row][1].letter == aiLetter) {
+        grid[row][2].letter = aiLetter
+        return
+      }
+    }
+
+    // cols
+    for (let col = 0; col < Board.SIZE; col++) {
+      if (grid[0][col].letter == Letter.Empty
+        && grid[1][col].letter == aiLetter
+        && grid[2][col].letter == aiLetter) {
+        grid[0][col].letter = aiLetter
+        return
+      }
+
+      if (grid[1][col].letter == Letter.Empty
+        && grid[0][col].letter == aiLetter
+        && grid[2][col].letter == aiLetter) {
+        grid[1][col].letter = aiLetter
+        return
+      }
+
+      if (grid[2][col].letter == Letter.Empty
+        && grid[0][col].letter == aiLetter
+        && grid[1][col].letter == aiLetter) {
+        grid[2][col].letter = aiLetter
+        return
+      }
+    }
+
+    // diagonals
+    if (grid[0][0].letter == Letter.Empty
+      && grid[1][1].letter == aiLetter
+      && grid[2][2].letter == aiLetter) {
+      grid[0][0].letter = aiLetter
+      return
+    }
+
+    if (grid[1][1].letter == Letter.Empty
+      && grid[0][0].letter == aiLetter
+      && grid[2][2].letter == aiLetter) {
+      grid[1][1].letter = aiLetter
+      return
+    }
+
+    if (grid[2][2].letter == Letter.Empty
+      && grid[0][0].letter == aiLetter
+      && grid[1][1].letter == aiLetter) {
+      grid[2][2].letter = aiLetter
+      return
+    }
+
+    if (grid[2][0].letter == Letter.Empty
+      && grid[1][1].letter == aiLetter
+      && grid[0][2].letter == aiLetter) {
+      grid[2][0].letter = aiLetter
+      return
+    }
+
+    if (grid[1][1].letter == Letter.Empty
+      && grid[2][0].letter == aiLetter
+      && grid[0][2].letter == aiLetter) {
+      grid[1][1].letter = aiLetter
+      return
+    }
+
+    if (grid[0][2].letter == Letter.Empty
+      && grid[2][0].letter == aiLetter
+      && grid[1][1].letter == aiLetter) {
+      grid[0][2].letter = aiLetter
+      return
+    }
+
+    // end take the win
+
     // take center
     if (this.board.movesCount() == 8 && grid[1][1].letter == Letter.Empty) {
       grid[1][1].letter = aiLetter
       return
     }
 
-    // prevent triangle trap
+    // prevent triangle traps
     if (this.board.movesCount() == 6) {
 
       if (grid[0][0].letter == playerLetter
@@ -102,6 +197,27 @@ class Game extends React.Component<{}, {}> {
         && grid[1][1].letter == aiLetter
         && grid[2][0].letter == playerLetter) {
         grid[0][1].letter = aiLetter
+        return
+      }
+
+      if (grid[0][0].letter == aiLetter
+        && grid[1][1].letter == playerLetter
+        && grid[2][2].letter == playerLetter) {
+        grid[0][2].letter = aiLetter
+        return
+      }
+
+      if (grid[1][1].letter == aiLetter
+        && grid[2][1].letter == playerLetter
+        && grid[0][2].letter == playerLetter) {
+        grid[1][2].letter = aiLetter
+        return
+      }
+
+      if (grid[1][1].letter == aiLetter
+        && grid[2][1].letter == playerLetter
+        && grid[1][2].letter == playerLetter) {
+        grid[0][2].letter = aiLetter
         return
       }
     }
@@ -201,6 +317,8 @@ class Game extends React.Component<{}, {}> {
       grid[2][0].letter = aiLetter
       return
     }
+
+    // end diagonals
 
     // first available
     for (let row = 0; row < Board.SIZE; row++) {
