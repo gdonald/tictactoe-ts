@@ -220,6 +220,32 @@ class Game extends React.Component<{}, {}> {
         grid[0][2].letter = aiLetter
         return
       }
+
+      if (grid[1][1].letter == aiLetter
+        && grid[1][2].letter == playerLetter
+        && grid[2][0].letter == playerLetter) {
+        grid[2][1].letter = aiLetter
+        return
+      }
+
+      if (grid[1][1].letter == aiLetter
+        && grid[2][1].letter == playerLetter
+        && grid[0][0].letter == playerLetter) {
+        grid[1][0].letter = aiLetter
+        return
+      }
+    }
+
+    if (this.board.movesCount() == 4) {
+
+      if (grid[1][1].letter == aiLetter
+        && grid[1][0].letter == aiLetter
+        && grid[0][0].letter == playerLetter
+        && grid[2][1].letter == playerLetter
+	&& grid[1][2].letter == playerLetter) {
+        grid[2][2].letter = aiLetter
+        return
+      }
     }
 
     // rows
