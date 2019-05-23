@@ -9,6 +9,7 @@ class Game extends React.Component<{}, {}> {
   public board: Board
   public mounted: boolean = false
   public aiThinking: boolean = false
+  public numberPlayers: string = "1"
 
   constructor(props) {
     super(props)
@@ -34,6 +35,11 @@ class Game extends React.Component<{}, {}> {
     if (this.mounted) {
       this.forceUpdate()
     }
+  }
+
+  public handleNumberPlayersClick(numberPlayers: string): void {
+    this.numberPlayers = numberPlayers
+    console.log("this.numberPlayers: " + this.numberPlayers)
   }
 
   public handlePieceClick(piece: Piece): void {

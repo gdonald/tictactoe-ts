@@ -7,6 +7,7 @@ body {
 .board table {
   border-spacing: 0;
   border-collapse: collapse;
+  margin: 0 auto;
 }
 
 .board tbody th, .board thead th {
@@ -30,4 +31,8 @@ body {
   padding: 6px 0 0 6px;
   margin: 0;
   border: 1px solid #00a;
+}
+
+.options {
+  text-align: center;
 }

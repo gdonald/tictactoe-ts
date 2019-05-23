@@ -1,6 +1,7 @@
 import React from "react"
 import Game, {Turn} from "./Game"
 import Piece, {Letter} from "./Piece"
+import NumberPlayers from "./NumberPlayers"
 
 class Board extends React.Component<{}, {}> {
 
@@ -30,6 +31,9 @@ class Board extends React.Component<{}, {}> {
   public render() {
     return (
       <div className="outer">
+        <div className="options">
+          <NumberPlayers game={this.game}></NumberPlayers>
+        </div>
         <div className="board">
           <table>
             <tbody>
