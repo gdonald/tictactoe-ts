@@ -14,10 +14,10 @@ npm install
 npm start
 ``
 
-#### Play
+#### Play Locally
 
 [http://localhost:9000/](http://localhost:9000/)
 
-#### Demo
+#### Play Online / Demo
 
 [http://tictactoe.gregdonald.com/](http://tictactoe.gregdonald.com/)
