@@ -2,6 +2,8 @@
 
 TicTacToe written in Typescript using React.
 
+![TicTacToe](https://raw.githubusercontent.com/gdonald/tictactoe-ts/main/ss.png, "TicTacToe")
+
 #### Install
 
 ``
@@ -20,4 +22,4 @@ npm start
 
 #### Play Online / Demo
 
-[http://tictactoe.gregdonald.com/](http://tictactoe.gregdonald.com/)
+[https://gdonald.github.io/tictactoe-ts/](https://gdonald.github.io/tictactoe-ts/)
