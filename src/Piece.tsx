@@ -3,7 +3,14 @@ import Game from "./Game"
 
 export enum Letter { X, O, Empty }
 
-class Piece extends React.Component {
+interface PieceProps {
+  game: Game
+  letter: Letter
+  col: number
+  row: number
+}
+
+class Piece extends React.Component<PieceProps> {
 
   public static images: string[] = [
     "x", "o", "empty",
@@ -14,7 +21,7 @@ class Piece extends React.Component {
   public col: number
   public row: number
 
-  constructor(props) {
+  constructor(props: PieceProps) {
     super(props)
 
     this.game = props.game
@@ -25,7 +32,7 @@ class Piece extends React.Component {
     this.handleClick = this.handleClick.bind(this)
   }
 
-  public render() {
+  public render(): JSX.Element {
     return (
       <td className="piece" key={`c${this.col}r${this.row}`} onClick={this.handleClick}>
         <div key={`piece${this.col}${this.row}`}>

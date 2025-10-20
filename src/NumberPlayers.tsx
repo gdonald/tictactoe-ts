@@ -8,7 +8,7 @@ class NumberPlayers extends React.Component<IProps, IState> {
 
   public game: Game
 
-  constructor(props) {
+  constructor(props: IProps) {
     super(props)
 
     this.state = { selectedOption: "1" }
@@ -26,30 +26,40 @@ class NumberPlayers extends React.Component<IProps, IState> {
                value="0"
                checked={this.state.selectedOption === "0"}
                onChange={this.handleChange}
+               onClick={this.handleClick}
         /> 0 &nbsp;
         <input type="radio"
                name="numberPlayers"
                value="1"
                checked={this.state.selectedOption === "1"}
                onChange={this.handleChange}
+               onClick={this.handleClick}
         /> 1 &nbsp;
         <input type="radio"
                name="numberPlayers"
                value="2"
                checked={this.state.selectedOption === "2"}
                onChange={this.handleChange}
+               onClick={this.handleClick}
         /> 2 &nbsp;
         </p>
       </>
     )
   }
 
-  handleChange = (changEvent) => {
+  handleChange = (changEvent: React.ChangeEvent<HTMLInputElement>): void => {
     this.setState({
       selectedOption: changEvent.target.value
     })
 
     this.game.handleNumberPlayersClick(changEvent.target.value)
+  }
+
+  handleClick = (clickEvent: React.MouseEvent<HTMLInputElement>): void => {
+    const value = (clickEvent.target as HTMLInputElement).value
+    if (value === this.state.selectedOption) {
+      this.game.handleNumberPlayersClick(value)
+    }
   }
 }
 

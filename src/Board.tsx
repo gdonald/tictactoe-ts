@@ -3,17 +3,21 @@ import Game, {Turn} from "./Game"
 import Piece, {Letter} from "./Piece"
 import NumberPlayers from "./NumberPlayers"
 
-class Board extends React.Component<{}, {}> {
+interface BoardProps {
+  game: Game
+}
+
+class Board extends React.Component<BoardProps> {
 
   public static SIZE: number = 3
 
   public game: Game
-  public grid: Piece[][]
+  public grid: Piece[][] = []
   public turn: Turn
   public playerLetter: Letter
   public aiLetter: Letter
 
-  constructor(props) {
+  constructor(props: BoardProps) {
     super(props)
 
     this.game = props.game

@@ -18,7 +18,7 @@ npm start
 
 #### Play Locally
 
-[http://localhost:9000/](http://localhost:9000/)
+[http://localhost:9876/](http://localhost:9876/)
 
 #### Play Online / Demo
 

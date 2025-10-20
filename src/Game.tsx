@@ -1,26 +1,74 @@
 import React from "react"
 import Board from "./Board"
+import LaunchSimulation from "./LaunchSimulation"
 import Piece, {Letter} from "./Piece"
 
 export enum Turn { Player, Ai }
 
-class Game extends React.Component<{}, {}> {
+interface GameProps {}
+
+interface GameState {
+  waitIsActive: boolean
+  gamesPlayed: number
+  simulationActive: boolean
+  decodingProgress: string
+  displayProgress: string
+  decoded: boolean
+  currentIndex: number
+}
+
+class Game extends React.Component<GameProps, GameState> {
+
+  private static readonly LAUNCH_CODE = "CPE-1704-TKS"
+  private static readonly SIMULATION_THRESHOLD = 80
+  private static readonly LAUNCH_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
   public board: Board
   public mounted: boolean = false
   public aiThinking: boolean = false
   public numberPlayers: string = "1"
-  public aiSpeed: number = 200
+  public aiSpeed: number = 130
+  private launchInterval: ReturnType<typeof setInterval> | null = null
 
-  constructor(props) {
+  constructor(props: GameProps) {
     super(props)
 
     this.board = new Board({game: this})
     this.board.initalize()
+
+    const initialProgress = Game.createPlaceholder(Game.LAUNCH_CODE)
+    const firstIndex = Game.pickRandomUnresolvedIndex(initialProgress)
+    this.state = {
+      waitIsActive: false,
+      gamesPlayed: 0,
+      simulationActive: false,
+      decodingProgress: initialProgress,
+      displayProgress: initialProgress,
+      decoded: false,
+      currentIndex: firstIndex,
+    }
   }
 
-  public render() {
-    return <>{this.board.render()}</>
+  public render(): React.ReactNode {
+    return (
+      <>
+        {this.board.render()}
+        {this.renderLaunchSimulation()}
+      </>
+    )
+  }
+
+  private renderLaunchSimulation(): React.ReactNode {
+    if (!this.state.simulationActive) {
+      return null
+    }
+
+    return (
+      <LaunchSimulation
+        progress={this.state.displayProgress}
+        decoded={this.state.decoded}
+      />
+    )
   }
 
   public componentDidMount(): void {
@@ -30,6 +78,10 @@ class Game extends React.Component<{}, {}> {
 
   public componentWillMount(): void {
     this.mounted = false
+  }
+
+  public componentWillUnmount(): void {
+    this.clearLaunchInterval()
   }
 
   public forceUpdateIfMounted(): void {
@@ -42,7 +94,7 @@ class Game extends React.Component<{}, {}> {
     return this.numberPlayers === "0"
   }
 
-  public recalculateAiSpeed() {
+  public recalculateAiSpeed(): void {
     this.aiSpeed = this.aiSpeed - 5
 
     if (this.aiSpeed < 0) {
@@ -50,48 +102,75 @@ class Game extends React.Component<{}, {}> {
     }
   }
 
-  public delayedAiTurnLoop(letter: Letter) {
-    if (!this.numberPlayersZero()) {
-
-      setTimeout(() => {
-        this.board.turn = Turn.Player
-        this.board.initalize()
-        this.forceUpdateIfMounted()
-      }, this.aiSpeed)
-
+  public delayedAiTurnLoop(letter: Letter): void {
+    if (!this.numberPlayersZero() || this.state.simulationActive) {
       return
     }
 
-    const that = this
     setTimeout(() => {
+      if (this.state.simulationActive || !this.numberPlayersZero()) {
+        return
+      }
+
       this.waitAiTurn(letter)
       this.forceUpdateIfMounted()
-      if (!that.board.isGameOver()) {
-        letter = this.otherLetter(letter)
-        that.delayedAiTurnLoop(letter)
-      } else {
+
+      if (this.board.isGameOver()) {
         setTimeout(() => {
+          if (this.state.simulationActive || !this.numberPlayersZero()) {
+            return
+          }
+
+          const shouldContinue = this.recordCompletedGame()
+          if (!shouldContinue) {
+            return
+          }
+
           this.recalculateAiSpeed()
           this.board.initalize()
           this.forceUpdateIfMounted()
           this.delayedAiTurnLoop(letter)
         }, this.aiSpeed)
+        return
       }
+
+      const nextLetter = this.otherLetter(letter)
+      this.delayedAiTurnLoop(nextLetter)
     }, this.aiSpeed)
   }
 
   public handleNumberPlayersClick(numberPlayers: string): void {
+    const previousMode = this.numberPlayers
     this.numberPlayers = numberPlayers
 
-    if (this.numberPlayersZero()) {
+    if (numberPlayers === "0") {
+      if (previousMode !== "0") {
+        this.resetSimulationState()
+      }
+
       this.board.initalize()
+      this.board.turn = Turn.Player
+      this.aiThinking = false
       this.forceUpdateIfMounted()
       this.delayedAiTurnLoop(this.board.playerLetter)
+      return
     }
+
+    this.resetSimulationState()
+    this.board.initalize()
+    this.board.turn = Turn.Player
+    this.aiThinking = false
+    this.forceUpdateIfMounted()
   }
 
   public handlePieceClick(piece: Piece): void {
-    if (this.board.turn !== Turn.Player) {
+    if (this.state.simulationActive) {
+      return
+    }
+
+    const isTwoPlayer = this.numberPlayers === "2"
+
+    if (!isTwoPlayer && this.board.turn !== Turn.Player) {
       return
     }
 
@@ -115,19 +194,32 @@ class Game extends React.Component<{}, {}> {
     }
 
     this.board.changeTurn()
+    if (isTwoPlayer) {
+      this.forceUpdateIfMounted()
+      return
+    }
+
+    if (this.numberPlayers !== "1") {
+      this.forceUpdateIfMounted()
+      return
+    }
+
     this.aiThinking = true
     this.forceUpdateIfMounted()
     this.waitAiTurn(this.board.aiLetter)
   }
 
-  private waitAiTurn(letter: Letter) {
-    if (this.board.isGameOver()) {
+  private waitAiTurn(letter: Letter): void {
+    if (this.state.simulationActive || this.board.isGameOver()) {
       return
     }
 
-    const that = this
     setTimeout(() => {
-      that.aiTurn(letter)
+      if (this.state.simulationActive || this.board.isGameOver()) {
+        return
+      }
+
+      this.aiTurn(letter)
       this.board.changeTurn()
       this.aiThinking = false
       this.forceUpdateIfMounted()
@@ -135,6 +227,9 @@ class Game extends React.Component<{}, {}> {
   }
 
   private aiTurn(letter: Letter): void {
+    if (this.state.simulationActive) {
+      return
+    }
 
     const aiLetter = letter
     const playerLetter = this.otherLetter(letter)
@@ -456,7 +551,166 @@ class Game extends React.Component<{}, {}> {
     }
   }
 
-  otherLetter(letter: Letter) {
+  private recordCompletedGame(): boolean {
+    if (this.state.simulationActive) {
+      return false
+    }
+
+    const nextGamesPlayed = this.state.gamesPlayed + 1
+    const shouldStartSimulation = nextGamesPlayed >= Game.SIMULATION_THRESHOLD
+
+    this.setState({gamesPlayed: nextGamesPlayed}, () => {
+      if (shouldStartSimulation) {
+        this.startLaunchSimulation()
+      }
+    })
+
+    return !shouldStartSimulation
+  }
+
+  private startLaunchSimulation(): void {
+    this.clearLaunchInterval()
+    this.aiThinking = false
+
+    const placeholder = Game.createPlaceholder(Game.LAUNCH_CODE)
+    const firstIndex = Game.pickRandomUnresolvedIndex(placeholder)
+
+    this.setState({
+      simulationActive: true,
+      decodingProgress: placeholder,
+      displayProgress: placeholder,
+      decoded: false,
+      currentIndex: firstIndex,
+    })
+
+    this.launchInterval = setInterval(() => {
+      this.advanceLaunchSimulation()
+    }, 150)
+  }
+
+  private advanceLaunchSimulation(): void {
+    this.setState((prevState) => {
+      if (prevState.decoded) {
+        return null
+      }
+
+      const target = Game.LAUNCH_CODE
+      const progressChars = prevState.decodingProgress.split("")
+      const displayChars = prevState.displayProgress.split("")
+
+      let currentIndex: number = prevState.currentIndex
+      let updatedProgress = prevState.decodingProgress
+      let updatedDisplay = prevState.displayProgress
+      let decoded: boolean = prevState.decoded
+
+      const unresolved = Game.unresolvedIndices(prevState.decodingProgress)
+
+      if (unresolved.length === 0) {
+        decoded = true
+        updatedProgress = target
+        updatedDisplay = target
+        currentIndex = -1
+      } else {
+        if (currentIndex === -1 || progressChars[currentIndex] === target[currentIndex]) {
+          currentIndex = Game.pickRandomUnresolvedIndex(prevState.decodingProgress)
+        }
+
+        if (currentIndex !== -1) {
+          const guess =
+            Game.LAUNCH_CHARSET[Math.floor(Math.random() * Game.LAUNCH_CHARSET.length)]
+          displayChars[currentIndex] = guess
+
+          if (guess === target[currentIndex]) {
+            progressChars[currentIndex] = target[currentIndex]
+            displayChars[currentIndex] = target[currentIndex]
+            updatedProgress = progressChars.join("")
+            const remaining = Game.unresolvedIndices(updatedProgress)
+            decoded = remaining.length === 0
+            updatedDisplay = decoded ? target : displayChars.join("")
+            currentIndex = decoded ? -1 : Game.pickRandomUnresolvedIndex(updatedProgress)
+          } else {
+            updatedProgress = progressChars.join("")
+            updatedDisplay = displayChars.join("")
+            decoded = false
+          }
+        }
+      }
+
+      return {
+        decodingProgress: updatedProgress,
+        displayProgress: updatedDisplay,
+        decoded,
+        currentIndex,
+      }
+    }, () => {
+      if (this.state.decoded) {
+        this.concludeLaunchSimulation()
+      }
+    })
+  }
+
+  private concludeLaunchSimulation(): void {
+    this.clearLaunchInterval()
+    this.setState({
+      decodingProgress: Game.LAUNCH_CODE,
+      displayProgress: Game.LAUNCH_CODE,
+      currentIndex: -1,
+    })
+  }
+
+  private clearLaunchInterval(): void {
+    if (this.launchInterval !== null) {
+      clearInterval(this.launchInterval)
+      this.launchInterval = null
+    }
+  }
+
+  private resetSimulationState(): void {
+    this.clearLaunchInterval()
+    this.aiSpeed = 130
+    this.aiThinking = false
+    const placeholder = Game.createPlaceholder(Game.LAUNCH_CODE)
+    const firstIndex = Game.pickRandomUnresolvedIndex(placeholder)
+
+    this.setState({
+      simulationActive: false,
+      decoded: false,
+      decodingProgress: placeholder,
+      displayProgress: placeholder,
+      currentIndex: firstIndex,
+      gamesPlayed: 0,
+    })
+  }
+
+  private static createPlaceholder(code: string): string {
+    return code.split("").map((char) => (char === "-" ? "-" : "_")).join("")
+  }
+
+  private static unresolvedIndices(progress: string): number[] {
+    const indices: number[] = []
+    for (let i = 0; i < Game.LAUNCH_CODE.length; i++) {
+      if (Game.LAUNCH_CODE[i] === "-") {
+        continue
+      }
+
+      if (progress[i] !== Game.LAUNCH_CODE[i]) {
+        indices.push(i)
+      }
+    }
+    return indices
+  }
+
+  private static pickRandomUnresolvedIndex(progress: string): number {
+    const remaining = Game.unresolvedIndices(progress)
+    if (remaining.length === 0) {
+      return -1
+    }
+
+    const choice = Math.floor(Math.random() * remaining.length)
+    return remaining[choice]
+  }
+
+  otherLetter(letter: Letter): Letter {
     return letter === Letter.X ? Letter.O : Letter.X
   }
 }
