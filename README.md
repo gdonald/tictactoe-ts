@@ -54,23 +54,6 @@ npx playwright install chromium
 npm run test:e2e
 ``
 
-#### Timings
-
-The game's four timings are read from the query string, so a browser can ask for a
-faster game than the one the demo ships with. The end to end tests use this to watch
-the computer play itself out in a couple of seconds instead of a couple of minutes.
-
-| Parameter | Default | Controls |
-| --- | --- | --- |
-| `games` | 80 | games the computer plays itself before it gives up and decodes the launch code |
-| `aiSpeed` | 130 | milliseconds between moves while the computer plays itself, shortened by 5 after each game |
-| `aiDelay` | 200 | milliseconds the computer takes to answer a person's move |
-| `decodeSpeed` | 150 | milliseconds between guesses at the launch code |
-
-A value that is missing, negative, or not a number falls back to the default.
-
-[http://localhost:9876/?games=3&aiSpeed=1&aiDelay=1&decodeSpeed=1](http://localhost:9876/?games=3&aiSpeed=1&aiDelay=1&decodeSpeed=1)
-
 #### Lint and Types
 
 ``
