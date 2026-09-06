@@ -40,7 +40,7 @@ describe("Board", () => {
   })
 
   it("renders a square for each cell in the grid", () => {
-    render(<table><tbody>{board.render()}</tbody></table>)
+    render(board.render())
 
     expect(screen.getAllByRole("img")).toHaveLength(9)
   })

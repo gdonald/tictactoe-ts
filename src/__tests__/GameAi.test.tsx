@@ -116,6 +116,20 @@ describe("the computer choosing a move", () => {
     })
   })
 
+  describe("looking past a fork that is not there", () => {
+    it("blocks instead on a fourth move that sets up no fork", () => {
+      expect(moveFrom(["XX.", "...", "..O"])).toEqual(["XXO", "...", "..O"])
+    })
+
+    it("blocks instead on a fifth move that sets up no fork", () => {
+      expect(moveFrom(["XO.", "..O", "X.."])).toEqual(["XO.", "O.O", "X.."])
+    })
+
+    it("takes the first free square on a sixth move that sets up no fork", () => {
+      expect(moveFrom(["XXO", "O..", "X.."])).toEqual(["XXO", "OO.", "X.."])
+    })
+  })
+
   describe("blocking a row the player is about to complete", () => {
     it("blocks at the right end", () => {
       expect(moveFrom(["XX.", "...", "..."])).toEqual(["XXO", "...", "..."])
