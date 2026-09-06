@@ -32,7 +32,7 @@ class Piece extends React.Component<PieceProps> {
     this.handleClick = this.handleClick.bind(this)
   }
 
-  public render(): JSX.Element {
+  public render(): React.JSX.Element {
     return (
       <td className="piece" key={`c${this.col}r${this.row}`} onClick={this.handleClick}>
         <div key={`piece${this.col}${this.row}`}>

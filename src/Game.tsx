@@ -2,10 +2,13 @@ import React from "react"
 import Board from "./Board"
 import LaunchSimulation from "./LaunchSimulation"
 import Piece, {Letter} from "./Piece"
+import {Settings} from "./Settings"
 
 export enum Turn { Player, Ai }
 
-interface GameProps {}
+interface GameProps {
+  settings: Settings
+}
 
 interface GameState {
   waitIsActive: boolean
@@ -20,19 +23,21 @@ interface GameState {
 class Game extends React.Component<GameProps, GameState> {
 
   private static readonly LAUNCH_CODE = "CPE-1704-TKS"
-  private static readonly SIMULATION_THRESHOLD = 80
   private static readonly LAUNCH_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
+  public settings: Settings
   public board: Board
   public mounted: boolean = false
   public aiThinking: boolean = false
   public numberPlayers: string = "1"
-  public aiSpeed: number = 130
+  public aiSpeed: number
   private launchInterval: ReturnType<typeof setInterval> | null = null
 
   constructor(props: GameProps) {
     super(props)
 
+    this.settings = props.settings
+    this.aiSpeed = this.settings.aiSpeed
     this.board = new Board({game: this})
     this.board.initalize()
 
@@ -223,7 +228,7 @@ class Game extends React.Component<GameProps, GameState> {
       this.board.changeTurn()
       this.aiThinking = false
       this.forceUpdateIfMounted()
-    }, 200)
+    }, this.settings.aiThinkingDelay)
   }
 
   private aiTurn(letter: Letter): void {
@@ -557,7 +562,7 @@ class Game extends React.Component<GameProps, GameState> {
     }
 
     const nextGamesPlayed = this.state.gamesPlayed + 1
-    const shouldStartSimulation = nextGamesPlayed >= Game.SIMULATION_THRESHOLD
+    const shouldStartSimulation = nextGamesPlayed >= this.settings.gamesBeforeSimulation
 
     this.setState({gamesPlayed: nextGamesPlayed}, () => {
       if (shouldStartSimulation) {
@@ -585,7 +590,7 @@ class Game extends React.Component<GameProps, GameState> {
 
     this.launchInterval = setInterval(() => {
       this.advanceLaunchSimulation()
-    }, 150)
+    }, this.settings.decodingSpeed)
   }
 
   private advanceLaunchSimulation(): void {
@@ -615,24 +620,22 @@ class Game extends React.Component<GameProps, GameState> {
           currentIndex = Game.pickRandomUnresolvedIndex(prevState.decodingProgress)
         }
 
-        if (currentIndex !== -1) {
-          const guess =
-            Game.LAUNCH_CHARSET[Math.floor(Math.random() * Game.LAUNCH_CHARSET.length)]
-          displayChars[currentIndex] = guess
+        const guess =
+          Game.LAUNCH_CHARSET[Math.floor(Math.random() * Game.LAUNCH_CHARSET.length)]
+        displayChars[currentIndex] = guess
 
-          if (guess === target[currentIndex]) {
-            progressChars[currentIndex] = target[currentIndex]
-            displayChars[currentIndex] = target[currentIndex]
-            updatedProgress = progressChars.join("")
-            const remaining = Game.unresolvedIndices(updatedProgress)
-            decoded = remaining.length === 0
-            updatedDisplay = decoded ? target : displayChars.join("")
-            currentIndex = decoded ? -1 : Game.pickRandomUnresolvedIndex(updatedProgress)
-          } else {
-            updatedProgress = progressChars.join("")
-            updatedDisplay = displayChars.join("")
-            decoded = false
-          }
+        if (guess === target[currentIndex]) {
+          progressChars[currentIndex] = target[currentIndex]
+          displayChars[currentIndex] = target[currentIndex]
+          updatedProgress = progressChars.join("")
+          const remaining = Game.unresolvedIndices(updatedProgress)
+          decoded = remaining.length === 0
+          updatedDisplay = decoded ? target : displayChars.join("")
+          currentIndex = decoded ? -1 : Game.pickRandomUnresolvedIndex(updatedProgress)
+        } else {
+          updatedProgress = progressChars.join("")
+          updatedDisplay = displayChars.join("")
+          decoded = false
         }
       }
 
@@ -667,7 +670,7 @@ class Game extends React.Component<GameProps, GameState> {
 
   private resetSimulationState(): void {
     this.clearLaunchInterval()
-    this.aiSpeed = 130
+    this.aiSpeed = this.settings.aiSpeed
     this.aiThinking = false
     const placeholder = Game.createPlaceholder(Game.LAUNCH_CODE)
     const firstIndex = Game.pickRandomUnresolvedIndex(placeholder)
